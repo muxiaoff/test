@@ -1,0 +1,207 @@
+<% if (dbType == "mysql") { %>
+-- mysql存储过程
+-- ==========================================================================================
+-- Author:	${config.author}
+-- Create date:	${tool.currentTime()}
+-- ==========================================================================================
+
+
+delimiter $
+-- 新增
+drop procedure if exists sp_${config.enBigName}_Insert $
+
+CREATE PROCEDURE sp_${config.enBigName}_Insert(
+    in Id varchar(50),
+    <% for(field in tableInfo.fields!){ %>
+        <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+    in ${field.name}  ${field.type},
+        <% } %>
+    <% } %>
+    in Remark longtext,
+    in CreateUserId varchar(50),
+    in CreateUserName varchar(50))
+BEGIN
+    INSERT INTO ${config.enBigName} (
+        Id,
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        ${field.name},
+        <% } %>
+        <% } %>
+        Remark,
+        IsDeleted,
+        CreateUserId,
+        CreateUserName,
+        CreateTime
+    ) VALUES (
+        Id,
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        ${field.name},
+        <% } %>
+        <% } %>
+        remark,
+        1,
+        CreateUserId,
+        CreateUserName,
+        NOW()
+    );
+END $
+
+-- 修改
+drop procedure if exists sp_${config.enBigName}_Update $
+
+CREATE PROCEDURE sp_${config.enBigName}_Update(
+    in Id varchar(50),
+    <% for(field in tableInfo.fields!){ %>
+        <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+    in ${field.name}  ${field.type},
+        <% } %>
+    <% } %>
+    in Remark longtext,
+    in UpdateUserId varchar(50),
+    in UpdateUserName varchar(50))
+BEGIN
+    UPDATE ${config.enBigName} ${config.enBigName} SET
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        ${field.name} = ${field.name},
+            <% } %>
+        <% } %>
+        Remark = Remark,
+        UpdateUserId = UpdateUserId,
+        UpdateUserName = UpdateUserName,
+        UpdateTime = NOW()
+    WHERE ${config.enBigName}.Id = Id;
+END $
+
+-- 逻辑删除单条数据
+drop procedure if exists sp_${config.enBigName}_DeleteRow $
+CREATE PROCEDURE sp_${config.enBigName}_DeleteRow(
+    in Id varchar(50),
+    in DeleteUserId varchar(50),
+    in DeleteUserName varchar(50))
+BEGIN
+    UPDATE ${config.enBigName} ${config.enBigName} SET
+        IsDeleted = 2,
+        DeleteUserId = DeleteUserId,
+        DeleteUserName = DeleteUserName,
+        DeleteTime = NOW()
+    WHERE ${config.enBigName}.Id = Id;
+END $
+
+<% } %>
+
+<% if (dbType == "sql_server") { %>
+
+GO
+if Exists(select name from sysobjects where NAME = 'sp_${config.enBigName}_Insert' and type='P')
+drop procedure sp_${config.enBigName}_Insert
+
+GO
+-- ==========================================================================================
+-- Entity Name:	sp_${config.enBigName}_Insert
+-- Author:	${config.author}
+-- Create date:	${tool.currentTime()}
+-- Description:	向表【${config.enBigName}】插入一条数据
+-- ==========================================================================================
+CREATE PROCEDURE sp_${config.enBigName}_Insert(
+    @Id varchar(50),
+    <% for(field in tableInfo.fields!){ %>
+        <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+    @${field.name}  ${field.type},
+        <% } %>
+    <% } %>
+    @Remark varchar(MAX),
+    @CreateUserId varchar(50),
+    @CreateUserName varchar(50))
+AS BEGIN
+    INSERT INTO [dbo].[${config.enBigName}] (
+        [Id],
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        [${field.name}],
+        <% } %>
+        <% } %>
+        [Remark],
+        [IsDeleted],
+        [CreateUserId],
+        [CreateUserName],
+        [CreateTime]
+    ) VALUES (
+        @Id,
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        @${field.name},
+        <% } %>
+        <% } %>
+        @remark,
+        1,
+        @CreateUserId,
+        @CreateUserName,
+        GETDATE()
+    )
+END;
+
+
+
+GO
+if Exists(select name from sysobjects where NAME = 'sp_${config.enBigName}_Update' and type='P')
+drop procedure sp_${config.enBigName}_Update
+GO
+-- ==========================================================================================
+-- Entity Name:	sp_${config.enBigName}_Update
+-- Author:	${config.author}
+-- Create date:	${tool.currentTime()}
+-- Description:	向表【${config.enBigName}】更新一条数据
+-- ==========================================================================================
+CREATE PROCEDURE sp_${config.enBigName}_Update(
+    @Id varchar(50),
+    <% for(field in tableInfo.fields!){ %>
+        <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+    @${field.name}  ${field.type},
+        <% } %>
+    <% } %>
+    @Remark varchar(MAX),
+    @UpdateUserId varchar(50),
+    @UpdateUserName varchar(50))
+BEGIN
+    UPDATE [dbo].[${config.enBigName}] SET
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        [${field.name}] = @${field.name},
+            <% } %>
+        <% } %>
+        [Remark] = @Remark,
+        [UpdateUserId] = @UpdateUserId,
+        [UpdateUserName] = @UpdateUserName,
+        [UpdateTime] = GETDATE()
+    WHERE [Id] = @Id
+END ;
+
+
+GO
+if Exists(select name from sysobjects where NAME = 'sp_${config.enBigName}_DeleteRow' and type='P')
+drop procedure sp_${config.enBigName}_DeleteRow
+GO
+-- ==========================================================================================
+-- Entity Name:	sp_${config.enBigName}_DeleteRow
+-- Author:	${config.author}
+-- Create date:	${tool.currentTime()}
+-- Description:	向表【${config.enBigName}】删除一条数据
+-- ==========================================================================================
+CREATE PROCEDURE sp_${config.enBigName}_DeleteRow(
+    @Id varchar(50),
+    @DeleteUserId varchar(50),
+    @DeleteUserName varchar(50))
+BEGIN
+    UPDATE [dbo].[${config.enBigName}] SET
+        [IsDeleted] = 2,
+        [DeleteUserId] = @DeleteUserId,
+        [DeleteUserName] = @DeleteUserName,
+        [DeleteTime] = GETDATE()
+    WHERE [Id] = @Id
+END;
+
+
+<% } %>

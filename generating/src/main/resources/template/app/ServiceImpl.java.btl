@@ -1,0 +1,22 @@
+package ${config.prePackageName}.${config.moduleName}.service.impl;
+
+<% for(import in config.serviceImports!){ %>
+import ${import};
+<% } %>
+import ${config.prePackageName}.${config.moduleName}.dao.${config.enBigName}Dao;
+import ${config.prePackageName}.${config.moduleName}.entity.${config.enBigName};
+import ${config.prePackageName}.${config.moduleName}.dto.vo.${config.enBigName}Vo;
+import ${config.prePackageName}.${config.moduleName}.service.${config.enBigName}Service;
+import org.springframework.stereotype.Service;
+
+/**
+ * ${config.chName}Service
+ *
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+@Service
+public class ${config.enBigName}ServiceImpl extends CrudService<${config.enBigName}Dao, ${config.enBigName}, ${config.enBigName}Vo> implements ${config.enBigName}Service{
+
+
+}

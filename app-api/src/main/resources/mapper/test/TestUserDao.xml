@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cangu.app.business.test.dao.TestUserDao">
+    <!-- 输出字段列 -->
+	<sql id="testUserColumns">
+       a.Id as "id",
+       a.user_name as "userName",
+       a.Name as "name",
+       a.Image as "image",
+       a.Status as "status",
+       a.Password as "password",
+       a.Email as "email",
+       a.Phone as "phone",
+       a.User_Type as "userType",
+       a.login_error_count as "loginErrorCount",
+       a.Login_Error_Time as "loginErrorTime",
+       a.Registration_Ids as "registrationIds",
+       a.Remark as "remark",
+       a.Create_User_Id as "createUserId",
+       a.Create_Time as "createTime",
+       a.Update_User_Id as "updateUserId",
+       a.Update_Time as "updateTime",
+       a.Is_Deleted as "isDeleted",
+       a.Delete_User_Id as "deleteUserId",
+       a.Delete_Time as "deleteTime"
+	</sql>
+
+	<!-- 输出字段关联表 -->
+    <sql id="testUserJoins">
+    </sql>
+
+    <!-- 查询单条记录 -->
+    <select id="get" resultType="TestUser">
+        SELECT
+            <include refid="testUserColumns"/>
+        FROM test_user a
+        <include refid="testUserJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 查询列表 -->
+    <select id="list" resultType="TestUser">
+        SELECT
+            <include refid="testUserColumns"/>
+        FROM test_user a
+        <include refid="testUserJoins"/>
+        <where>
+            a.Is_Deleted = 1
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(userName)">
+                AND a.user_name = #{userName}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(name)">
+                AND a.Name = #{name}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(image)">
+                AND a.Image = #{image}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validInt(status)">
+                AND a.Status = #{status}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(password)">
+                AND a.Password = #{password}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(email)">
+                AND a.Email = #{email}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(phone)">
+                AND a.Phone = #{phone}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validInt(userType)">
+                AND a.User_Type = #{userType}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validInt(loginErrorCount)">
+                AND a.login_error_count = #{loginErrorCount}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(loginErrorTime)">
+                AND a.Login_Error_Time = #{loginErrorTime}
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(registrationIds)">
+                AND a.Registration_Ids = #{registrationIds}
+            </if>
+        </where>
+        <choose>
+            <when test="@com.cangu.app.util.ExpandUtil@validStr(orderBy)">
+                ORDER BY ${orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.CreateTime DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO test_user(
+            id,
+            user_name,
+            Name,
+            Image,
+            Status,
+            Password,
+            Email,
+            Phone,
+            User_Type,
+            login_error_count,
+            Login_Error_Time,
+            Registration_Ids,
+            Is_Deleted,
+            Create_User_Id,
+            Create_Time
+        ) VALUES (
+            #{id},
+            #{user_name},
+            #{name},
+            #{image},
+            #{status},
+            #{password},
+            #{email},
+            #{phone},
+            #{user_Type},
+            #{login_error_count},
+            #{login_Error_Time},
+            #{registration_Ids},
+            1,
+            '${@com.cangu.app.util.CurrentUser@userId()}',
+            NOW()
+        )
+    </insert>
+
+    <!-- 修改 -->
+    <update id="update">
+        UPDATE test_user SET
+            user_name = #{userName},
+            Name = #{name},
+            Image = #{image},
+            Status = #{status},
+            Password = #{password},
+            Email = #{email},
+            Phone = #{phone},
+            User_Type = #{userType},
+            login_error_count = #{loginErrorCount},
+            Login_Error_Time = #{loginErrorTime},
+            Registration_Ids = #{registrationIds},
+            Update_User_Id = '${@com.cangu.app.util.CurrentUser@userId()}',
+            Update_Time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据id修改实体中不为null的列 -->
+    <update id="updateExistById">
+        UPDATE test_user SET
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(userName)">
+                user_name = #{userName},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(name)">
+                Name = #{name},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(image)">
+                Image = #{image},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(status)">
+                Status = #{status},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(password)">
+                Password = #{password},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(email)">
+                Email = #{email},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(phone)">
+                Phone = #{phone},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(userType)">
+                User_Type = #{userType},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(loginErrorCount)">
+                login_error_count = #{loginErrorCount},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(loginErrorTime)">
+                Login_Error_Time = #{loginErrorTime},
+            </if>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(registrationIds)">
+                Registration_Ids = #{registrationIds},
+            </if>
+            Update_User_Id = '${@com.cangu.app.util.CurrentUser@userId()}',
+            Update_Time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <update id="delete">
+        UPDATE test_user SET
+            Is_Deleted = 2,
+            Delete_User_Id = '${@com.cangu.app.util.CurrentUser@userId()}',
+            Delete_Time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+           #{id}
+        </foreach>
+    </update>
+
+    <!-- 查询唯一记录 -->
+    <select id="findUniqueByProperty" resultType="TestUser">
+        SELECT
+            <include refid="testUserColumns"/>
+        FROM test_user a
+        <include refid="testUserJoins"/>
+        WHERE ${propertyName} = #{value}
+    </select>
+</mapper>

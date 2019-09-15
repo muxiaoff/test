@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${config.prePackageName}.${config.moduleName}.dao.${config.enBigName}Dao">
+    <!-- 输出字段列 -->
+	<sql id="${config.enName}Columns">
+       <% for(field in tableInfo.fields!){ %>
+       a.${field.name} as "${tool.firstLetterToLower(tool.toCamelCase(field.name))}"${fieldLP.last?"":","}
+       <% } %>
+	</sql>
+
+	<!-- 输出字段关联表 -->
+    <sql id="${config.enName}Joins">
+    </sql>
+
+    <!-- 查询单条记录 -->
+    <select id="get" resultType="${config.enBigName}">
+        SELECT
+            <include refid="${config.enName}Columns"/>
+        FROM ${tableInfo.name} a
+        <include refid="${config.enName}Joins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 查询列表 -->
+    <select id="list" resultType="${config.enBigName}">
+        SELECT
+            <include refid="${config.enName}Columns"/>
+        FROM ${tableInfo.name} a
+        <include refid="${config.enName}Joins"/>
+        <where>
+            a.Is_Deleted = 1
+            <% for(field in tableInfo.fields!){
+                if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) {
+            %>
+                    <% if (field.columnType.type == "Integer") { %>
+            <if test="@com.cangu.app.util.ExpandUtil@validInt(${tool.firstLetterToLower(tool.toCamelCase(field.name))})">
+                AND a.${field.name} = #{${tool.firstLetterToLower(tool.toCamelCase(field.name))}}
+            </if>
+                    <% } %>
+                    <% if (field.columnType.type != "Integer") { %>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(${tool.firstLetterToLower(tool.toCamelCase(field.name))})">
+                AND a.${field.name} = #{${tool.firstLetterToLower(tool.toCamelCase(field.name))}}
+            </if>
+                    <% } %>
+            <% }} %>
+        </where>
+        <choose>
+            <when test="@com.cangu.app.util.ExpandUtil@validStr(orderBy)">
+                ORDER BY ${"${"}orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.CreateTime DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ${tableInfo.name}(
+            id,
+            <% for(field in tableInfo.fields!){
+                if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) {
+            %>
+            ${field.name}${fieldLP.last?"":","}
+            <% }} %>
+            Is_Deleted,
+            Create_User_Id,
+            Create_Time
+        ) VALUES (
+            #{id},
+            <% for(field in tableInfo.fields!){
+                if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) {
+            %>
+            #{${tool.firstLetterToLower(field.name)}}${fieldLP.last?"":","}
+            <% }} %>
+            1,
+            '${'${'}@com.cangu.app.util.CurrentUser@userId()}',
+            <% if (dbType == "mysql") { %>
+            NOW()
+            <% } %>
+            <% if (dbType == "sql_server") { %>
+            GETDATE()
+            <% } %>
+        )
+    </insert>
+
+    <!-- 修改 -->
+    <update id="update">
+        UPDATE ${tableInfo.name} SET
+            <% for(field in tableInfo.fields!){
+                if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) {
+            %>
+            ${field.name} = #{${tool.firstLetterToLower(tool.toCamelCase(field.name))}}${fieldLP.last?"":","}
+            <% }} %>
+            Update_User_Id = '${'${'}@com.cangu.app.util.CurrentUser@userId()}',
+            Update_Time = <% if (dbType == "mysql") { %>NOW()<% } %><% if (dbType == "sql_server") { %>GETDATE() <% } %>
+
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据id修改实体中不为null的列 -->
+    <update id="updateExistById">
+        UPDATE ${tableInfo.name} SET
+            <% for(field in tableInfo.fields!){
+                if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) {
+            %>
+            <if test="@com.cangu.app.util.ExpandUtil@validStr(${tool.firstLetterToLower(tool.toCamelCase(field.name))})">
+                ${field.name} = #{${tool.firstLetterToLower(tool.toCamelCase(field.name))}}${fieldLP.last?"":","}
+            </if>
+            <% }} %>
+            Update_User_Id = '${'${'}@com.cangu.app.util.CurrentUser@userId()}',
+            Update_Time = <% if (dbType == "mysql") { %>NOW()<% } %><% if (dbType == "sql_server") { %>GETDATE() <% } %>
+
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <update id="delete">
+        UPDATE ${tableInfo.name} SET
+            Is_Deleted = 2,
+            Delete_User_Id = '${'${'}@com.cangu.app.util.CurrentUser@userId()}',
+            Delete_Time = <% if (dbType == "mysql") { %>NOW()<% } %><% if (dbType == "sql_server") { %>GETDATE() <% } %>
+
+        WHERE id IN
+        <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+           #{id}
+        </foreach>
+    </update>
+
+    <!-- 查询唯一记录 -->
+    <select id="findUniqueByProperty" resultType="${config.enBigName}">
+        SELECT
+            <include refid="${config.enName}Columns"/>
+        FROM ${tableInfo.name} a
+        <include refid="${config.enName}Joins"/>
+        WHERE ${"$"}{propertyName} = ${"#"}{value}
+    </select>
+</mapper>

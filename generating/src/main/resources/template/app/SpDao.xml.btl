@@ -1,0 +1,113 @@
+cols
+===
+    <% for(field in tableInfo.fields!){ %>
+    a.${field.name} as ${tool.firstLetterToLower(field.name)}${fieldLP.last?"":","}
+    <% } %>
+
+condition
+===
+    WHERE
+        a.IsDeleted = 1
+    <% for(field in tableInfo.fields!){ %>
+        <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        <% if (field.columnType.type == "Integer") { %>
+        @if(isNotEmptyAnd0(_root.${tool.firstLetterToLower(field.name)})) {
+            AND a.${field.name} = #{_root.${tool.firstLetterToLower(field.name)}}
+        @}
+        <% } %>
+        <% if (field.columnType.type != "Integer") { %>
+        @if(isNotEmpty(_root.${tool.firstLetterToLower(field.name)})) {
+            AND a.${field.name} = #{_root.${tool.firstLetterToLower(field.name)}}
+        @}
+        <% } %>
+        <% } %>
+    <% } %>
+
+findPage
+===
+    SELECT
+    @pageTag(){
+        #{use("cols")}
+    @}
+    FROM ${config.enBigName} a
+    #{use("condition")}
+    @pageIgnoreTag(){
+        ORDER BY a.CreateTime DESC
+    @}
+
+findList
+===
+    SELECT
+        #{use("cols")}
+    FROM ${config.enBigName} a
+        #{use("condition")}
+    ORDER BY a.CreateTime DESC
+
+findOne
+===
+    SELECT #{use("cols")} FROM ${config.enBigName} a WHERE a.id = #{id} AND a.IsDeleted = 1
+
+findByIds
+===
+    SELECT
+        #{use("cols")}
+    FROM ${config.enBigName} a
+    WHERE a.id IN (
+        #{join(ids)}
+    )
+    AND a.IsDeleted = 1
+
+create
+===
+    {call sp_${config.enBigName}_Insert (
+        #{id},
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        #{${tool.firstLetterToLower(field.name)}},
+        <% } %>
+        <% } %>
+        #{remark},
+        #{db.SessionUser().id},
+        #{db.SessionUser().name}
+    )}
+
+update
+===
+    {call sp_${config.enBigName}_Update (
+        #{id},
+        <% for(field in tableInfo.fields!){ %>
+            <% if (fieldUtil.getIsNotBaseField(field.name)) { %>
+        #{${tool.firstLetterToLower(field.name)}},
+        <% } %>
+        <% } %>
+        #{remark},
+        #{db.SessionUser().id},
+        #{db.SessionUser().name}
+    )}
+    
+deleteByLogic
+===
+    {call sp_${config.enBigName}_DeleteRow(
+        #{id},
+        #{db.SessionUser().id},
+        #{db.SessionUser().name}
+    )}
+    
+deleteByIds
+===
+    UPDATE ${config.enBigName} SET 	
+        IsDeleted = 2,
+        Delete${config.enBigName}Id = #{db.SessionUser().id},
+        Delete${config.enBigName}Name = #{db.SessionUser().name},
+        DeleteTime = <% if (dbType == "mysql") { %>NOW()<% } %><% if (dbType == "sql_server") { %>GETDATE()<% } %>
+
+    WHERE id IN (
+             #{join(ids)}
+         )
+    
+findUniqueByProperty
+===
+    SELECT
+        #{use("cols")}
+    FROM ${config.enBigName} a
+    WHERE #{text(propertyName)} = '#{text(value)}'

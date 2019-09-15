@@ -1,0 +1,130 @@
+package ${config.prePackageName}.${config.moduleName}.web;
+
+<% for(import in config.controllerImports!){ %>
+import ${import};
+<% } %>
+import ${config.prePackageName}.${config.moduleName}.dto.arg.${config.enBigName}Insert;
+import ${config.prePackageName}.${config.moduleName}.dto.arg.${config.enBigName}Search;
+import ${config.prePackageName}.${config.moduleName}.dto.arg.${config.enBigName}Update;
+import ${config.prePackageName}.${config.moduleName}.entity.${config.enBigName};
+import ${config.prePackageName}.${config.moduleName}.dto.vo.${config.enBigName}Vo;
+import ${config.prePackageName}.${config.moduleName}.service.${config.enBigName}Service;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
+import java.util.List;
+import javax.annotation.Resource;
+
+/**
+ * ${config.chName}Controller
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+@RestController
+@RequestMapping("/${config.enName}")
+@Api(tags = "${config.chName}", description = "${config.chName}", produces= MediaType.APPLICATION_JSON_VALUE)
+public class ${config.enBigName}Controller extends BaseController {
+
+    private final String PREFIX = "/${config.enName}/";
+    private final String CN_PREFIX = "${config.chName}";
+
+    @Resource
+    private ${config.enBigName}Service ${config.enName}Service;
+
+    /**
+     * 分页查询
+     * @url /${config.enName}/page
+     * @param ${config.enName}Search
+     * @return
+     */
+    @GetMapping(value = page)
+    @ApiOperation(value = page_Ch, httpMethod = GET, notes = auth_yes)
+    @Log(description = CN_PREFIX + page_Ch, url = PREFIX + page)
+    public Res<PageVo<${config.enBigName},${config.enBigName}Vo>> page(@Valid ${config.enBigName}Search ${config.enName}Search) {
+
+        return Res.ok(${config.enName}Service.page(${config.enName}Search.getPageNo(), ${config.enName}Search.getPageSize(), ${config.enName}Search.to${config.enBigName}()));
+    }
+
+    /**
+     * 列表查询
+     * @url /${config.enName}/list
+     * @param ${config.enName}Search
+     * @return
+     */
+    @GetMapping(value = list)
+    @ApiOperation(value = list_Ch, httpMethod = GET, notes = auth_yes)
+    @Log(description = CN_PREFIX + list_Ch, url = PREFIX + list)
+    public Res<List<${config.enBigName}Vo>> list(@Valid ${config.enBigName}Search ${config.enName}Search) {
+
+        return Res.ok(${config.enName}Service.list(${config.enName}Search.to${config.enBigName}()));
+    }
+
+    /**
+     * 单条查询
+     * @url /${config.enName}/get
+     * @param baseDto
+     * @param bindingResult
+     * @return
+     * @throws ParameterMissException
+     */
+    @GetMapping(value = single)
+    @ApiOperation(value = single_Ch, httpMethod = GET, notes = auth_yes)
+    @Log(description = CN_PREFIX + single_Ch, url = PREFIX + single)
+    public Res<${config.enBigName}Vo> single(@Valid BaseDto baseDto, BindingResult bindingResult) throws ParameterMissException{
+        checkBinding(bindingResult);
+        return Res.ok(${config.enName}Service.get(baseDto.getId()));
+    }
+
+    /**
+     * 新增
+     * @url /${config.enName}/insert
+     * @param ${config.enName}Insert
+     * @param bindingResult
+     * @return
+     * @throws ParameterMissException
+     */
+    @PostMapping(value = insert)
+    @ApiOperation(value = insert_Ch, httpMethod = POST, notes = auth_yes)
+    @Log(description = CN_PREFIX + insert_Ch, logType = log_insert, url = PREFIX + insert)
+    public Res<Integer> insert(@RequestBody @Valid ${config.enBigName}Insert ${config.enName}Insert, BindingResult bindingResult) throws ParameterMissException{
+        checkBinding(bindingResult);
+        return Res.ok(${config.enName}Service.insert(${config.enName}Insert.to${config.enBigName}()));
+    }
+
+    /**
+     * 修改
+     * @url /${config.enName}/update
+     * @param ${config.enName}Update
+     * @param bindingResult
+     * @return
+     * @throws ParameterMissException
+     */
+    @PostMapping(value = update)
+    @ApiOperation(value = update_Ch, httpMethod = POST, notes = auth_yes)
+    @Log(description = CN_PREFIX + update_Ch, logType = log_update, url = PREFIX + update)
+    public Res<Integer> update(@RequestBody @Valid ${config.enBigName}Update ${config.enName}Update, BindingResult bindingResult) throws ParameterMissException{
+        checkBinding(bindingResult);
+        return Res.ok(${config.enName}Service.update(${config.enName}Update.to${config.enBigName}()));
+    }
+
+    /**
+     * 删除
+     * @url /${config.enName}/delete
+     * @param idsDto
+     * @param bindingResult
+     * @return
+     * @throws ParameterMissException
+     */
+    @PostMapping(value = delete)
+    @ApiOperation(value = delete_Ch, httpMethod = POST, notes = auth_yes)
+    @Log(description = CN_PREFIX + delete_Ch, logType = log_delete, url = PREFIX + delete)
+    public Res<Integer> delete(@RequestBody @Valid IdsDto idsDto, BindingResult bindingResult) throws ParameterMissException{
+        checkBinding(bindingResult);
+        return Res.ok(${config.enName}Service.delete(idsDto.getIds()));
+    }
+
+}

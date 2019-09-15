@@ -1,0 +1,16 @@
+package ${config.prePackageName}.${config.moduleName}.dao;
+
+<% for(import in config.daoImports!){ %>
+import ${import};
+<% } %>
+import ${config.prePackageName}.${config.moduleName}.entity.${config.enBigName};
+import org.apache.ibatis.annotations.Mapper;
+/**
+ * ${config.chName}Dao
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+@Mapper
+public interface ${config.enBigName}Dao extends CrudDao<${config.enBigName}>{
+
+}

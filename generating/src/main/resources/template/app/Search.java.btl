@@ -1,0 +1,46 @@
+package ${config.prePackageName}.${config.moduleName}.dto.arg;
+
+<% for(import in config.searchImports!){ %>
+import ${import};
+<% } %>
+<% for(import in tableInfo.ImportPackages!){ %>
+import ${import};
+<% } %>
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.springframework.beans.BeanUtils;
+import ${config.prePackageName}.${config.moduleName}.entity.${config.enBigName};
+/**
+ * ${config.chName}Search
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+@Getter
+@Setter
+@ApiModel(value = "${config.enBigName}Search")
+public class ${config.enBigName}Search extends BasePageDto {
+
+    private static final long serialVersionUID = 1L;
+
+<% for(field in tableInfo.fields!){ %>
+    <% if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name)) && field.isSearch) { %>
+    /** ${field.comment} */
+    @ApiModelProperty(value = "${field.comment}")
+    <% if (tool.equals("Date", field.columnType.type + "")) { %>
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    <% } %>
+    private <% if (tool.equals("Date", field.columnType.type + "")) { %>LocalDateTime<% } %><% if (field.columnType.type == "Integer") { %>int<% } %><% if (field.columnType.type == "Float") { %>float<% } %><% if (field.columnType.type != "Date" && field.columnType.type != "Integer" && field.columnType.type != "Float") { %>${field.columnType.type}<% } %> ${tool.firstLetterToLower(tool.toCamelCase(field.name))}<% if (field.columnType.type == "String") { %> = ""<% } %>;
+    <% } %>
+<% } %>
+
+    public ${config.enBigName} to${config.enBigName}() {
+        ${config.enBigName} ${config.enName} = new ${config.enBigName}();
+        BeanUtils.copyProperties(this, ${config.enName});
+        return ${config.enName};
+    }
+
+}

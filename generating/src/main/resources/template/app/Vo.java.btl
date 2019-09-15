@@ -1,0 +1,38 @@
+package ${config.prePackageName}.${config.moduleName}.dto.vo;
+
+<% for(import in config.voImports!){ %>
+import ${import};
+<% } %>
+<% for(import in tableInfo.ImportPackages!){ %>
+import ${import};
+<% } %>
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+/**
+ * ${config.chName}Vo
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+@Getter
+@Setter
+@ApiModel(value = "${config.enBigName}Vo")
+public class ${config.enBigName}Vo extends BaseVo {
+
+    private static final long serialVersionUID = 1L;
+
+<% for(field in tableInfo.fields!){ %>
+    <% if (fieldUtil.getIsNotBaseField(tool.toCamelCase(field.name))) { %>
+    /** ${field.comment} */
+    @ApiModelProperty(value = "${field.comment}")
+    <% if (tool.equals("Date", field.columnType.type + "")) { %>
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    <% } %>
+    private <% if (tool.equals("Date", field.columnType.type + "")) { %>LocalDateTime<% } %><% if (field.columnType.type == "Integer") { %>int<% } %><% if (field.columnType.type == "Float") { %>float<% } %><% if (field.columnType.type != "Date" && field.columnType.type != "Integer" && field.columnType.type != "Float") { %>${field.columnType.type}<% } %> ${tool.firstLetterToLower(tool.toCamelCase(field.name))}<% if (field.columnType.type == "String") { %> = ""<% } %>;
+    <% } %>
+<% } %>
+
+}

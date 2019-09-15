@@ -1,0 +1,18 @@
+package ${config.prePackageName}.${config.moduleName}.service;
+
+<% for(import in config.serviceImports!){ %>
+import ${import};
+<% } %>
+import ${config.prePackageName}.${config.moduleName}.entity.${config.enBigName};
+import ${config.prePackageName}.${config.moduleName}.dto.vo.${config.enBigName}Vo;
+import com.cangu.app.persistence.service.IBaseService;
+/**
+ * ${config.chName}Service
+ *
+ * @author ${config.author}
+ * @Date ${tool.currentTime()}
+ */
+public interface ${config.enBigName}Service extends IBaseService<${config.enBigName}, ${config.enBigName}Vo> {
+
+
+}
